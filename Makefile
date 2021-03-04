@@ -6,7 +6,7 @@
 #    By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/21 18:15:56 by dohelee           #+#    #+#              #
-#    Updated: 2021/02/23 00:10:17 by dohelee          ###   ########.fr        #
+#    Updated: 2021/02/24 00:16:30 by dohelee          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,15 +30,13 @@ SRCS_NAME = main.c
 SRCS = $(addprefix $(SRCS_DIR)/, $(SRCS_NAME)) 
 OBJS = $(SRCS:.c=.o)
 
+$(SRCS_DIR)/%.o : $(SRCS_DIR)/%.c
+	$(CC) $(CFLAGS) -I$(SRCS_DIR) -c $^ -o $@
+
 $(NAME) : $(OBJS)
 	$(MAKE) all -C $(LIB_FT_DIR)
 	$(MAKE) all -C $(LIB_MLX_DIR)
-	$(CC) $(CFLAGS) $(OBJS) -L$(LIB_INC_DIR) -lXext -lX11 -lm -lbsd -o $(NAME) \
-							-L$(LIB_MLX_DIR) -l$(LIB_MLX_NAME) \
-							-L$(LIB_FT_DIR) -l$(LIB_FT_NAME)
-
-$(SRCS_DIR)/%.o : $(SRCS_DIR)/%.c
-	$(CC) $(CFLAGS) -I$(SRCS_DIR) -c $^ -o $@
+	$(CC) $(CFLAGS) $(OBJS) -L$(LIB_MLX_DIR) -l$(LIB_MLX_NAME) -L$(LIB_FT_DIR) -l$(LIB_FT_NAME) -L$(LIB_INC_DIR) -lXext -lX11 -lm -lbsd -o $(NAME)
 
 all	: $(NAME)
 
