@@ -6,12 +6,12 @@
 #    By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/21 18:15:56 by dohelee           #+#    #+#              #
-#    Updated: 2021/02/24 00:16:30 by dohelee          ###   ########.fr        #
+#    Updated: 2021/03/12 01:31:03 by dohelee          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc 
-CFLAGS = -O3 #-Wall -Wextra -Werror
+CFLAGS = -O3 -Wall -Wextra -Werror
 
 NORM = ~/.norminette/norminette.rb
 NORM_FLAGS = -R CheckForbiddenSourceHeader
@@ -26,7 +26,7 @@ LIB_FT_DIR = ./libft
 
 NAME = cub3D
 SRCS_DIR = ./srcs
-SRCS_NAME = main.c 
+SRCS_NAME = cub3d.c event.c math.c raycast.c draw_wall.c luminosity.c draw_map.c draw_sprite.c param_check.c map_parse.c save_bmp.c get_next_line.c
 SRCS = $(addprefix $(SRCS_DIR)/, $(SRCS_NAME)) 
 OBJS = $(SRCS:.c=.o)
 

@@ -12,6 +12,7 @@
 
 
 #include	"mlx_int.h"
+#include <stdio.h>
 
 /*
 ** To handle X errors
@@ -20,11 +21,15 @@
 #define	X_ShmAttach	1
 
 int	mlx_X_error;
+int ret;
 
 int	shm_att_pb(Display *d,XErrorEvent *ev)
 {
   if (ev->request_code==146 && ev->minor_code==X_ShmAttach)
-    write(2,WARN_SHM_ATTACH,strlen(WARN_SHM_ATTACH));
+  {
+    if ((ret = write(2,WARN_SHM_ATTACH,strlen(WARN_SHM_ATTACH))) < 0)
+      printf("write error\n");
+  }
   mlx_X_error = 1;
 }
 
