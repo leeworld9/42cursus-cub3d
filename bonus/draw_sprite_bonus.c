@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   draw_sprite.c                                      :+:      :+:    :+:   */
+/*   draw_sprite_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/06 03:34:36 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/14 23:09:36 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 23:10:18 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 t_sprite	*visspr_malloc(t_sprite *before_sparr, t_sprite sp, int n)
 {

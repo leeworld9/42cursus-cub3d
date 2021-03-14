@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_utils_1.c                                    :+:      :+:    :+:   */
+/*   parse_utils_1_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/13 07:21:18 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/15 03:00:51 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 12:34:36 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 int		remove_space(char *line, int *i)
 {
@@ -47,7 +47,7 @@ int		get_xpmfile(t_game *g, t_img *img, char *file)
 		return (-1);
 	close(fd);
 	img->i = mlx_xpm_file_to_image(g->mlx, file, &img->w, &img->h);
-	if (img == NULL || img->w != 64 || img->h != 64)
+	if (img == NULL)
 		return (-1);
 	color = mlx_get_data_addr(img->i, &img->b, &img->l, &img->e);
 	img->d = (unsigned int*)color;

@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cub3d.h                                            :+:      :+:    :+:   */
+/*   cub3d_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/21 18:48:13 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/14 23:52:31 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/15 02:42:18 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CUB3D_H
-# define CUB3D_H
+#ifndef CUB3D_BONUS_H
+# define CUB3D_BONUS_H
 
 # include "../minilibx-linux/mlx.h"
 # include "../libft/libft.h"
@@ -51,11 +51,12 @@
 # define MAPY 15
 # define ROTATE_UNIT 0.06
 # define MOVE_UNIT 0.15
-# define TILE_SIZE 10
+# define TILE_SIZE 7
 # define USER_SIZE 2
 # define USER_PAD 30
 
 # define KEY_PRESS_EVNT 2
+# define BUTTON_PRESS_EVNT 4
 # define EXIT_EVNT 33
 
 typedef struct		s_img
@@ -118,6 +119,10 @@ typedef struct		s_draw_wfc
 	int				yend;
 	double			h;
 	double			dh;
+	double			d_ratio;
+	double			fx;
+	double			fy;
+	double			lum;
 }					t_draw_wfc;
 
 typedef struct		s_draw_sp
@@ -182,6 +187,7 @@ typedef struct		s_game
 	double			py;
 	double			th;
 	int				err_chk;
+	t_img			m;
 }					t_game;
 
 int					render(t_game *g);
@@ -239,7 +245,6 @@ void				draw_sprites(t_game *g, int **vis, double zbuf[]);
 int					cub_parsing(t_game *g, char *line);
 int					check_resolution(t_game *g, char *line);
 int					check_texture(t_game *g, t_img *img, char *line, int *i);
-int					check_colors(unsigned int *color, char *line, int *i);
 int					check_map(t_game *g, char *line, int *i);
 
 int					remove_space(char *line, int *i);
@@ -265,9 +270,16 @@ void				get_bitmapfile(t_game *g, int fd);
 int					get_bitmap(t_game *g, int fd);
 
 int					key_press(int key, t_game *game);
-int					button_exit(void);
+int					event_exit(void);
 int					move_offset(double th, int key, double *pdx, double *pdy);
 int					player_move(t_game *game, int key);
 void				player_rotate(t_game *game, double th);
+
+void				draw_f_texture(t_game *g, t_draw_wfc *dwfc, int x, int y);
+void				draw_c_texture(t_game *g, t_draw_wfc *dwfc, int x, int y);
+
+void				draw_map(t_game *g);
+
+int					button_press(int button, int x, int y, t_game *g);
 
 #endif

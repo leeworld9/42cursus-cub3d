@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_cub.c                                        :+:      :+:    :+:   */
+/*   parse_cub_bonus.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/10 02:37:18 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/15 03:05:02 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 12:09:11 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "cub3d.h"
+#include "cub3d_bonus.h"
 
 int	cub_parsing(t_game *g, char *line)
 {
@@ -31,9 +31,9 @@ int	cub_parsing(t_game *g, char *line)
 	else if (line[i] == 'S' && line[i + 1] == ' ')
 		g->err_chk = check_texture(g, &g->sprite, line, &i);
 	else if (line[i] == 'F' && line[i + 1] == ' ')
-		g->err_chk = check_colors(&g->floor.color, line, &i);
+		g->err_chk = check_texture(g, &g->floor, line, &i);
 	else if (line[i] == 'C' && line[i + 1] == ' ')
-		g->err_chk = check_colors(&g->ceiling.color, line, &i);
+		g->err_chk = check_texture(g, &g->ceiling, line, &i);
 	else if ((line[i] == '1' || g->map.chk == 1) && line[i] != '\0')
 		g->err_chk = check_map(g, line, &i);
 	else if (g->err_chk == 0 && line[i] != '\0')
@@ -88,28 +88,6 @@ int	check_texture(t_game *g, t_img *img, char *line, int *i)
 	j = get_xpmfile(g, img, file);
 	free(file);
 	return (j == -1 ? -12 : 0);
-}
-
-int	check_colors(unsigned int *color, char *line, int *i)
-{
-	char	**str;
-	int		k;
-
-	k = 0;
-	if (*color != 0x000000)
-		return (-7);
-	if ((str = ft_split(&line[*i + 2], ',')) == NULL)
-		return (-10);
-	while (str[k] != NULL)
-		k++;
-	if (k != 3)
-		return (free_2d_c(str, k, -10));
-	if (!check_num(str[0]) || !check_num(str[1]) || !check_num(str[2]))
-		return (free_2d_c(str, k, -8));
-	if (ft_atoi(str[0]) > 255 || ft_atoi(str[1]) > 255 || ft_atoi(str[2]) > 255)
-		return (free_2d_c(str, k, -8));
-	*color = encode_color(ft_atoi(str[0]), ft_atoi(str[1]), ft_atoi(str[2]));
-	return (free_2d_c(str, k, 0));
 }
 
 int	check_map(t_game *g, char *line, int *i)
