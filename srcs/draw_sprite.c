@@ -6,91 +6,138 @@
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/06 03:34:36 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/12 01:33:34 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 11:23:23 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int cmp_sprites(const void* a, const void* b)
+t_sprite	*visspr_malloc(t_sprite *before_sparr, t_sprite sp, int n)
 {
-	if (((const t_sprite*)a)->dist > ((const t_sprite*)b)->dist)
-		return (-1);
-	else
-		return (1);
-}
+	t_sprite	*sparr;
+	int			cnt;
 
-t_sprite* get_visible_sprites(t_game *game, int **vis, int* cnt)
-{
-	int n = 0;
-	t_sprite* sp = NULL;
-
-	for( int x=0; x<game->map.mx; x++ ) {
-		for( int y=0; y<game->map.my; y++ ) {
-			if( vis[x][y] == 0 || map_get_cell(game, x, y) <= 1 || user_dir(map_get_cell(game, x, y))) // e뒤에는 NEWS를 위해서 임시로
-				continue;
-			if( n == 0 ) // need free()
-				sp = (t_sprite*)malloc(sizeof(t_sprite));
-			else 
-				sp = (t_sprite*)realloc(sp, sizeof(t_sprite)*(n+1));
-
-			//sp[n].tex = (map_get_cell(x,y) - 1) + 2; //스프라이트 여러개라고 가정했을때 몇번째 인지. (여기선 기본적으로 5이상으로 설정되어 있는듯)
-			sp[n].sx = x;
-			sp[n].sy = y;
-			sp[n].th = atan2((y+0.5)-(game->py), (x+0.5)-(game->px));
-			if( sp[n].th < 0 )
-				sp[n].th += (M_PI * 2);  //?
-			sp[n].dist = l2dist(game->px, game->py, x+0.5, y+0.5) * cos(game->th - sp[n].th);
-			n++;
+	cnt = 0;
+	sparr = NULL;
+	sparr = (t_sprite*)malloc(sizeof(t_sprite) * (n));
+	if (n != 1)
+	{
+		while (cnt < n - 1)
+		{
+			ft_memcpy(&sparr[cnt], &before_sparr[cnt], sizeof(t_sprite));
+			cnt++;
 		}
+		free(before_sparr);
 	}
-	*cnt = n;
-	return (sp);
+	ft_memcpy(&sparr[n - 1], &sp, sizeof(t_sprite));
+	return (sparr);
 }
 
-void draw_sprites(t_game *game, int **vis, double zbuf[])
+void		get_vis_sprites(t_game *g, t_sprite **sparr, int **vis, int *nsp)
 {
-	int nsp = 0;
-	t_sprite *sp = get_visible_sprites(game, vis, &nsp);
+	t_sprite	s;
+	int			x;
+	int			y;
 
-	//퀵정렬 못씀 따로 메소드 만들기.
-	qsort(sp, nsp, sizeof(t_sprite), cmp_sprites);  /* order by dist DESC */
+	*nsp = 0;
+	x = 0;
+	while (x < g->map.mx)
+	{
+		y = 0;
+		init_sprite(&s);
+		while (y < g->map.my)
+		{
+			if ((vis[x][y] == 0 || map_get_cell(g, x, y) <= 1 ||
+				user_dir(map_get_cell(g, x, y))) ? y++ : 0)
+				continue ;
+			s.sx = x;
+			s.sy = y;
+			s.th = atan2((y + 0.5) - g->py, (x + 0.5) - g->px);
+			s.th = (s.th < 0) ? s.th + (M_PI * 2) : s.th;
+			s.dist = l2dist(g->px, g->py, x + 0.5, y + 0.5) * cos(g->th - s.th);
+			*sparr = visspr_malloc(*sparr, s, ++*nsp);
+			y++;
+		}
+		x++;
+	}
+}
 
-	for( int i=0; i<nsp; i++ ) {
-		int sh = get_wall_height(game, sp[i].dist); /* sprite height (=width) */
-		double lum = get_luminosity(game, sp[i].dist);
+void		sort_sprite(t_sprite *sparr, int cnt)
+{
+	int			i;
+	int			j;
+	t_sprite	tmp;
 
-		double angle = sp[i].th - game->th; /* angle of sprite relative to FOV center */
-		if(angle > M_PI) 
-			angle -= (M_PI * 2);   /* ensures -pi < angle < +pi */
-		else if( angle < -M_PI ) 
-			angle += (M_PI * 2);
-
-		//설명 가능해야함!!
-		int cx = (int)((deg2rad(FOV) / 2.0 - angle) * game->pixel_per_angle); /* screen pos of sprite, in pixels */
-		int xmin = max(0, cx - sh/2); /* clipping */
-		int xmax = min(game->win.winx, cx + sh/2);
-
-		for( int x=xmin; x<xmax; x++ ) {
-			if( sp[i].dist > zbuf[x] ) 
-				continue; /* behind wall */
-			//if( sp[i].dist < PL_RADIUS ) 
-			//	continue; /* too close */
-
-			double txratio = (double)(x-cx)/sh + 0.5;
-			int tx = (int)(txratio * game->sprite.width); /* texture col # */
-			int y0 = (int)((game->win.winy - sh)/2.0);
-
-			for( int y=max(0, y0); y<min(game->win.winy, y0+sh); y++ ) {
-				int ty = (int)((double)(y-y0) * game->sprite.height / sh); /* texture row # */
-				int color = game->sprite.data[game->sprite.width * ty + tx];
-				//printf("color : %d\n", color);
-				if(color == 0x000000) 
-					continue; /* black == transparent */
-				game->img.data[game->win.winx * y + x] = fade_color(game->sprite.data[game->sprite.width * ty + tx], lum);
+	i = 0;
+	j = 0;
+	while (i < cnt)
+	{
+		j = 0;
+		while (j < cnt - (i + 1))
+		{
+			if (sparr[j].dist < sparr[j + 1].dist)
+			{
+				ft_memcpy(&tmp, &sparr[j + 1], sizeof(t_sprite));
+				ft_memcpy(&sparr[j + 1], &sparr[j], sizeof(t_sprite));
+				ft_memcpy(&sparr[j], &tmp, sizeof(t_sprite));
 			}
+			j++;
 		}
+		i++;
 	}
-	if( nsp > 0 )
-		free(sp);
+}
+
+void		draw_sp_texture(t_game *g, t_draw_sp *dsp, int i, double zbuf[])
+{
+	dsp->lum = get_luminosity(g, g->sparr[i].dist);
+	dsp->x = dsp->xmin;
+	while (dsp->x < dsp->xmax)
+	{
+		if (g->sparr[i].dist > zbuf[dsp->x] || g->sparr[i].dist < 0.2)
+		{
+			dsp->x++;
+			continue ;
+		}
+		dsp->txratio = (double)(dsp->x - dsp->cx) / dsp->sh + 0.5;
+		dsp->tx = (int)(dsp->txratio * g->sprite.w);
+		dsp->y0 = (int)((g->win.y - dsp->sh) / 2.0);
+		dsp->y = max(0, dsp->y0);
+		while (dsp->y < min(g->win.y, dsp->y0 + dsp->sh))
+		{
+			dsp->ty = (int)((double)(dsp->y - dsp->y0) * g->sprite.h / dsp->sh);
+			dsp->color = g->sprite.d[g->sprite.w * dsp->ty + dsp->tx];
+			if ((dsp->color == 0x000000) ? dsp->y++ : 0)
+				continue ;
+			g->img.d[g->win.x * dsp->y + dsp->x] = fade(dsp->color, dsp->lum);
+			dsp->y++;
+		}
+		dsp->x++;
+	}
+}
+
+void		draw_sprites(t_game *g, int **vis, double zbuf[])
+{
+	t_draw_sp	dsp;
+	int			i;
+
+	init_draw_sp(&dsp);
+	get_vis_sprites(g, &g->sparr, vis, &g->nsp);
+	sort_sprite(g->sparr, g->nsp);
+	i = 0;
+	while (i < g->nsp)
+	{
+		dsp.sh = get_wall_height(g, g->sparr[i].dist);
+		dsp.angle = g->sparr[i].th - g->th;
+		if (dsp.angle > M_PI)
+			dsp.angle -= (M_PI * 2);
+		else if (dsp.angle < -M_PI)
+			dsp.angle += (M_PI * 2);
+		dsp.cx = (int)((deg2rad(FOV) / 2.0 - dsp.angle) * g->pixel_per_angle);
+		dsp.xmin = max(0, dsp.cx - dsp.sh / 2);
+		dsp.xmax = min(g->win.x, dsp.cx + dsp.sh / 2);
+		draw_sp_texture(g, &dsp, i, zbuf);
+		i++;
+	}
+	if (g->nsp > 0)
+		free(g->sparr);
 }

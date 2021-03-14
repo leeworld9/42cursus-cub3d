@@ -6,7 +6,7 @@
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/21 18:48:13 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/12 01:35:40 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 11:20:51 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,223 +23,251 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
-
-//gnl//
 # include <unistd.h>
 # include <stdlib.h>
 # include <limits.h>
 
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 4096
-# endif
+# define BUFFER_SIZE 4096
+# define OPEN_MAX 256
 
-# ifndef OPEN_MAX
-#  define OPEN_MAX 256
-# endif
-//////
+# define BYTES_PER_PIXEL 4
+# define FILE_HEADER_SIZE 14
+# define INFO_HEADER_SIZE 40
 
-# define BYTES_PER_PIXEL	4
-# define FILE_HEADER_SIZE	14
-# define INFO_HEADER_SIZE	40
+# define KEY_ESC 65307
+# define KEY_W 119
+# define KEY_S 115
+# define KEY_A 97
+# define KEY_D 100
+# define KEY_UP 65362
+# define KEY_DOWN 65364
+# define KEY_LEFT 65361
+# define KEY_RIGHT 65363
 
-# define KEY_ESC			65307
-# define KEY_W				119
-# define KEY_S				115
-# define KEY_A				97
-# define KEY_D				100
-# define KEY_UP				65362
-# define KEY_DOWN			65364
-# define KEY_LEFT			65361
-# define KEY_RIGHT			65363
+# define EPS 1e-06
+# define FOV 60
+# define WALL_H 1.0
+# define MAPX 11
+# define MAPY 15
+# define ROTATE_UNIT 0.03
+# define MOVE_UNIT 0.1
+# define TILE_SIZE 10
+# define USER_SIZE 2
+# define USER_PAD 30
 
-# define	EPS			(1e-06)
-// # define	is_zero(d)	(fabs(d) < EPS)
-// # define	deg2rad(d)	((d)*M_PI/180.0)	/* degree to radian */
-// # define	rad2deg(d)	((d)*180.0/M_PI)	/* radian to degree */
-// #define  min(a,b)       ((a)<(b)? (a):(b))
-// #define  max(a,b)       ((a)>(b)? (a):(b))
+# define KEY_PRESS_EVNT 2
+# define EXIT_EVNT 33
 
-
-//해상도 변경시에는 make re를 안하면 적용안됨, make는 안먹힘.... 의존성 체크 안되나?
-//링킹과정 확인하기, 정확히는 h가 사용되는 시기 파악, o 만들때는 안쓰이지 않나? 모르겠다 확인 필요
-// # define	SX				800	 /* screen width */
-// # define	SY				600	 /* screen height */
-# define	FOV				60	  /* field of view (in degree) */ //시야각
-
-
-# define 	WALL_H			1.0
-
-# define 	MAPX			11
-# define	MAPY			15
-
-# define	ROTATE_UNIT		0.03	/* rad */
-# define	MOVE_UNIT		0.1
-
-# define	TILE_SIZE		10
-# define	USER_SIZE		2
-# define	USER_PAD		30
-
-# define	KEY_PRESS_EVNT	2
-# define 	EXIT_EVNT		33
-# define 	BTN_PRESS_EVNT	4
-
-typedef struct  s_img
+typedef struct		s_img
 {
-	void	*img;
-	unsigned int *data;
-	int		width;
-	int		height;
-	int		bpp;
-	int		line_size;
-	int		endian;
+	void			*i;
+	unsigned int	*d;
+	int				w;
+	int				h;
+	int				b;
+	int				l;
+	int				e;
 	unsigned int	color;
-}	t_img;
+}					t_img;
 
-typedef struct s_sprite
+typedef struct		s_sprite
 {
-	//int	tex;	 /* texture bitmap no. */
-	int	sx;
-	int	sy;
-	double	dist;
-	double	th;
-}			  t_sprite;
+	int				sx;
+	int				sy;
+	double			dist;
+	double			th;
+}					t_sprite;
 
-typedef enum e_dir
+typedef enum		e_dir
 {
 	DIR_N = 0,
 	DIR_E,
 	DIR_W,
 	DIR_S
-}			t_dir;
+}					t_dir;
 
-typedef struct s_wall
+typedef struct		s_wall
 {
-	double	wx;
-	double	wy;
-	t_dir	wdir;
-}			t_wall;
+	double			wx;
+	double			wy;
+	t_dir			wdir;
+}					t_wall;
 
-typedef struct s_win
+typedef struct		s_win
 {
-	void	*win;
-	int		winx;
-	int		winy;
-}			t_win;
+	void			*w;
+	int				x;
+	int				y;
+	int				max_x;
+	int				max_y;
+}					t_win;
 
-typedef struct	s_map
+typedef struct		s_map
 {
-	char	**map;
-	int		mx; //tmp
-	int		my; //tmp
-	int		chk;
-}				t_map;
+	char			**map;
+	int				mx;
+	int				my;
+	int				chk;
+}					t_map;
 
-typedef struct	s_game
+typedef struct		s_draw_wfc
 {
-	void	*mlx;
-	t_win	win;
-	t_map	map;
-	double	fov_v;
-	double	pixel_per_angle;
-	double	angle_per_pixel;
-	t_img	img;
-	t_img	bottom;
-	t_img	top;
-	t_img	sprite;
-	t_img	mapimg;
-	t_img	wall_n;
-	t_img	wall_s;
-	t_img	wall_w;
-	t_img	wall_e;
-	double	px;
-	double	py;
-	double	th;
-}			   t_game;
+	int				y0;
+	int				y1;
+	int				ystart;
+	int				yend;
+	double			h;
+	double			dh;
+}					t_draw_wfc;
 
+typedef struct		s_draw_sp
+{
+	int				x;
+	int				y;
+	int				sh;
+	double			angle;
+	int				cx;
+	int				xmin;
+	int				xmax;
+	double			txratio;
+	int				tx;
+	int				y0;
+	int				ty;
+	int				color;
+	double			lum;
+}					t_draw_sp;
 
-typedef enum e_hitside
+typedef enum		e_hitside
 {
 	VERT,
 	HORIZ
-}			t_hitside;
+}					t_hitside;
 
-// static int map[MAPX][MAPY] = {
-// 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-// 	{1, 0, 0, 'W', 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1},
-// 	{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1},
-// 	{1, 1, 1, 1, 0, 2, 0, 0, 0, 0, 1, 0, 1, 0, 1},
-// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1},
-// 	{1, 0, 0, 0, 0, 2, 0, 0, 1, 1, 1, 1, 1, 0, 1},
-// 	{1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 0, 0, 0, 1},
-// 	{1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-// 	{1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1},
-// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-// 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-// 	};
+typedef struct		s_ray
+{
+	t_hitside		hs;
+	int				xstep;
+	int				ystep;
+	double			xslope;
+	double			yslope;
+	double			nx;
+	double			ny;
+	double			fx;
+	double			gx;
+	int				mapx;
+	int				mapy;
+	bool			hit;
+}					t_ray;
 
-void	draw_square(t_game *game, int x, int y, int color);
-void	draw_squares(t_game *game);
-void	draw_line(t_game *game, double x1, double y1, double x2, double y2);
-void	draw_lines(t_game *game);
-void	draw_user(t_game *game);
-void	draw_map(t_game *game);
+typedef struct		s_game
+{
+	void			*mlx;
+	t_win			win;
+	t_map			map;
+	double			fov_v;
+	double			pixel_per_angle;
+	double			angle_per_pixel;
+	t_img			img;
+	t_img			floor;
+	t_img			ceiling;
+	t_img			sprite;
+	t_sprite		*sparr;
+	int				nsp;
+	t_wall			wall;
+	t_img			wall_n;
+	t_img			wall_s;
+	t_img			wall_w;
+	t_img			wall_e;
+	double			px;
+	double			py;
+	double			th;
+	int				err_chk;
+}					t_game;
 
-int cmp_sprites( const void* a, const void* b ); //static 
-t_sprite* get_visible_sprites(t_game *game, int **vis, int* pcnt); //static 
-void draw_sprites(t_game *game, int **vis, double zbuf[]); //static 
+int					render(t_game *g);
+int					draw_loop(t_game *g);
+int					get_tx(t_game *get_wall_height);
 
-int get_wall_height(t_game *game, double dist);
-void draw_wall(t_game *game, double wdist, int x, t_wall *wall, int tx);
-// void draw_floor(t_game *game, double wdist, int x, t_wall *wall, int tx);
-int sign( double d );
-int map_get_cell(t_game *game, int x, int y);
-bool get_wall_intersection(double ray, t_game *game, t_wall *wall, int **vis);
+void				init_draw_sp(t_draw_sp *dsp);
+void				init_draw_wfc(t_draw_wfc *dwfc);
+void				init_sprite(t_sprite *sp);
+void				cub_init(t_game *g);
+void				cub_set(t_game *g);
 
-int key_press(int keycode, t_game *game);
-int button_exit(int button, t_game *game);
-int	button_press(int button, t_game *game);
-int get_move_offset( double th, int key, double amt, double* pdx, double* pdy ); //static 
-int player_move( t_game *game, int key, double amt );
-void player_rotate(t_game *game, double th );
+int					**malloc_2d(int i, int j);
+int					free_2d_i(int **arr, int j, int errnum);
+int					free_2d_c(char **arr, int j, int errnum);
+void				memset_2d(int **arr, int x, int y, int c);
+void				cub_close(t_game *g);
 
-void decode_color(int color, int *r, int *g, int *b);
-int encode_color(int r, int g, int b);
-double get_luminosity(t_game *game, double dist);
-int fade_color( int color, double lum );
+int					get_wall_height(t_game *g, double dist);
+int					map_get_cell(t_game *g, int x, int y);
+void				draw_wall(t_game *g, double wdist, int x, int tx);
+int					get_wall_tex(t_game *g, int tx, int ty);
 
-double l2dist( double x0, double y0, double x1, double y1 );
-double cast_single_ray( int x, t_game *game, t_wall *wall, int **vis);
+void				draw_floor_ceiling(t_game *g, double wdist, int x);
 
-void render(t_game *game);
-int		draw_loop(t_game *game);
+void				set_ray_variable(double ray, t_game *g, t_ray *r);
+bool				get_wall_intersection(double ray, t_game *g, int **vis);
+t_hitside			find_hitmap(t_game *g, t_ray *r, int *mapx, int *mapy);
+bool				hit_location(t_game *g, t_ray *r);
+double				cast_single_ray(int x, t_game *g, int **visiable);
 
-double is_zero(double d);
-double deg2rad(double d);
-double rad2deg(double d);
-int max(int a, int b);
-int min(int a, int b);
+int					sign(double d);
+double				l2dist(double x0, double y0, double x1, double y1);
+double				check_angle(int angle);
 
-bool	user_dir(int c);
+int					get_next_line(int fd, char **line);
 
-int	user_location(t_game *game);
-int		param_chk(t_game *game, int argc, char **argv);
-int		ext_check(char *argv, char *ext);
-int		cub_check(t_game *game, char *argv, int fd);
-int		ft_strerror(int err);
-int		get_next_line(int fd, char **line);
-int		check_resolution(t_game *game, char *line);
+double				is_zero(double d);
+double				deg2rad(double d);
+double				rad2deg(double d);
+int					max(int a, int b);
+int					min(int a, int b);
 
-int		cub_check(t_game *game, char *argv, int fd);
-int 	map_parsing(t_game *game, char *line);
+void				decode_color(int color, int *r, int *g, int *b);
+int					encode_color(int r, int g, int b);
+double				get_luminosity(t_game *g, double dist);
+int					fade(int color, double lum);
 
-int		check_colors(unsigned int *color, char *line, int *i);
-int		check_texture(t_game *game, t_img *img, char *line, int *i);
-int		get_xpmfile(t_game *game, t_img *img, char *file);
+t_sprite			*visspr_malloc(t_sprite *before_sparr, t_sprite sp, int n);
+void				get_vis_sprites(t_game *g, t_sprite **s, int **v, int *n);
+void				sort_sprite(t_sprite *sparr, int cnt);
+void				draw_sp_texture(t_game *g, t_draw_sp *d, int i, double z[]);
+void				draw_sprites(t_game *g, int **vis, double zbuf[]);
 
+int					cub_parsing(t_game *g, char *line);
+int					check_resolution(t_game *g, char *line);
+int					check_texture(t_game *g, t_img *img, char *line, int *i);
+int					check_colors(unsigned int *color, char *line, int *i);
+int					check_map(t_game *g, char *line, int *i);
 
-int		get_bitmap(t_game *game, int fd);
-void	get_bitmapfile(t_game *game, int fd);
-void	get_bitmapinfo(t_game *game, int fd);
-void	get_bitmapdata(t_game *game, int fd);
+int					remove_space(char *line, int *i);
+int					get_xpmfile(t_game *g, t_img *img, char *file);
+char				*get_line(t_game *g, char *line, int *i);
+int					line_length(t_game *g, char *line);
+bool				check_num(char *str);
+
+bool				user_dir(int c);
+int					user_deg(int c);
+int					user_location(t_game *g);
+int					user_errchk(int chk);
+
+int					param_check(t_game *g, int argc, char **argv);
+int					ext_check(char *argv, char *ext);
+int					wall_check(t_game *g);
+int					cub_check(t_game *g, char *argv, int fd);
+int					ft_strerror(int err);
+
+void				get_bitmapdata(t_game *g, int fd);
+void				get_bitmapinfo(t_game *g, int fd);
+void				get_bitmapfile(t_game *g, int fd);
+int					get_bitmap(t_game *g, int fd);
+
+int					key_press(int key, t_game *game);
+int					button_exit(void);
+int					move_offset(double th, int key, double *pdx, double *pdy);
+int					player_move(t_game *game, int key);
+void				player_rotate(t_game *game, double th);
 
 #endif

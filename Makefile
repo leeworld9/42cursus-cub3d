@@ -6,12 +6,12 @@
 #    By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/02/21 18:15:56 by dohelee           #+#    #+#              #
-#    Updated: 2021/03/12 01:31:03 by dohelee          ###   ########.fr        #
+#    Updated: 2021/03/14 08:28:49 by dohelee          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc 
-CFLAGS = -O3 -Wall -Wextra -Werror
+CFLAGS = -g -O3 -Wall -Wextra -Werror
 
 NORM = ~/.norminette/norminette.rb
 NORM_FLAGS = -R CheckForbiddenSourceHeader
@@ -26,12 +26,32 @@ LIB_FT_DIR = ./libft
 
 NAME = cub3D
 SRCS_DIR = ./srcs
-SRCS_NAME = cub3d.c event.c math.c raycast.c draw_wall.c luminosity.c draw_map.c draw_sprite.c param_check.c map_parse.c save_bmp.c get_next_line.c
+SRCS_NAME = cub3d.c \
+			draw_floor_ceiling.c \
+			draw_sprite.c \
+			draw_wall.c \
+			event.c \
+			get_next_line.c \
+			init.c \
+			luminosity.c \
+			parse_cub.c \
+			parse_utils_1.c \
+			parse_utils_2.c \
+			math.c \
+			param_check.c \
+			raycast_utils.c \
+			raycast.c \
+			save_bmp.c \
+			utils.c
 SRCS = $(addprefix $(SRCS_DIR)/, $(SRCS_NAME)) 
 OBJS = $(SRCS:.c=.o)
+BONUS_DIR = ./bonus
 
 $(SRCS_DIR)/%.o : $(SRCS_DIR)/%.c
 	$(CC) $(CFLAGS) -I$(SRCS_DIR) -c $^ -o $@
+
+# $(BONUS_DIR)/%.o : $(BONUS_DIR)/%.c
+# 	$(CC) $(CFLAGS) -I$(BONUS_DIR) -c $^ -o $@
 
 $(NAME) : $(OBJS)
 	$(MAKE) all -C $(LIB_FT_DIR)
@@ -54,6 +74,6 @@ bonus :
 	##### not yet
 
 norm : 
-	$(NORM) $(NORM_FLAGS) $(SRCS_DIR)
-
+	$(NORM) $(NORM_FLAGS) $(SRCS_DIR)/*.c $(SRCS_DIR)/*.h
+	
 .PHONY: all clean fclean re bonus norm

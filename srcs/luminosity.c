@@ -6,7 +6,7 @@
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/03/06 03:34:48 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/11 10:27:13 by dohelee          ###   ########.fr       */
+/*   Updated: 2021/03/14 10:56:33 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,15 @@ int		encode_color(int r, int g, int b)
 	return (r << 16 | g << 8 | b);
 }
 
-double	get_luminosity(t_game *game, double dist)
+double	get_luminosity(t_game *g, double dist)
 {
 	double d;
 
-	d = (game->map.mx + game->map.my) / 2.0;
+	d = (g->map.mx + g->map.my) / 2.0;
 	return ((dist > d) ? 0 : (1.0 - dist / d));
 }
 
-int		fade_color(int color, double lum)
+int		fade(int color, double lum)
 {
 	int r;
 	int g;

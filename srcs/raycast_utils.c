@@ -1,44 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   math.c                                             :+:      :+:    :+:   */
+/*   raycast_utils.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dohelee <dohelee@student.42seoul.kr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/03/06 03:34:54 by dohelee           #+#    #+#             */
-/*   Updated: 2021/03/12 18:41:36 by dohelee          ###   ########.fr       */
+/*   Created: 2021/03/12 22:29:32 by dohelee           #+#    #+#             */
+/*   Updated: 2021/03/13 05:26:32 by dohelee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-double	is_zero(double d)
+int			sign(double d)
 {
-	return (fabs(d) < EPS);
-}
-
-double	deg2rad(double d)
-{
-	return (d * M_PI / 180.0);
-}
-
-double	rad2deg(double d)
-{
-	return (d * 180.0 / M_PI);
-}
-
-int		max(int a, int b)
-{
-	if (a >= b)
-		return (a);
+	if (is_zero(d))
+		return (0);
+	else if (d > 0)
+		return (1);
 	else
-		return (b);
+		return (-1);
 }
 
-int		min(int a, int b)
+double		l2dist(double x0, double y0, double x1, double y1)
 {
-	if (a <= b)
-		return (a);
-	else
-		return (b);
+	double dx;
+	double dy;
+
+	dx = x0 - x1;
+	dy = y0 - y1;
+	return (sqrt(dx * dx + dy * dy));
 }
