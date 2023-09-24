@@ -2,7 +2,7 @@
 # cub3d
 - cub3d : **42cursus (2 Circle)**
    - Status : Finished
-   - Completed date : 2021/03/15
+   - Completed Date : 2021/03/15
    - Evaluation : <span style="color: #008000">Success</sapn>
    - Score : <span style="color: #008000">105%</sapn>
 
